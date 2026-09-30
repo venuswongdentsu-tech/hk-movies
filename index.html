@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>香港電影週報</title>
+<meta name="description" content="香港戲院每週電影報告：新上映、仍在上映、評分與觀眾正負評">
+<meta name="theme-color" content="#0b1220">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="電影週報">
+<style>
+:root{
+  --bg:#0b1220; --card:#151f33; --card2:#1b2740; --line:#26334d;
+  --tx:#e8eefc; --dim:#93a2bd; --acc:#ffd166; --ok:#3ddc97; --bad:#ff6b6b;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);
+  font:16px/1.5 -apple-system,BlinkMacSystemFont,"PingFang HK","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  padding-bottom:calc(28px + var(--safe-b));overscroll-behavior-y:contain}
+header{position:sticky;top:0;z-index:20;background:rgba(11,18,32,.92);
+  backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line);
+  padding:calc(10px + var(--safe-t)) 14px 10px}
+.title{display:flex;align-items:baseline;gap:8px}
+.title h1{margin:0;font-size:19px;letter-spacing:.3px}
+.title .dt{font-size:12px;color:var(--dim)}
+.search{margin:9px 0 8px;position:relative}
+.search input{width:100%;font-size:16px;padding:10px 12px 10px 34px;border-radius:11px;
+  background:var(--card);border:1px solid var(--line);color:var(--tx);outline:none}
+.search svg{position:absolute;left:10px;top:9px;width:17px;height:17px;opacity:.55}
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;font-size:13px;padding:6px 13px;border-radius:999px;border:1px solid var(--line);
+  background:var(--card);color:var(--dim);white-space:nowrap}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#20160a;font-weight:600}
+select.sort{background:var(--card);border:1px solid var(--line);color:var(--tx);font-size:13px;
+  border-radius:999px;padding:6px 10px;margin-left:auto}
+main{padding:12px 14px 0;max-width:820px;margin:0 auto}
+.sechead{margin:16px 2px 8px;font-size:14px;color:var(--dim);font-weight:600;letter-spacing:.4px}
+.sechead b{color:var(--acc)}
+.card{display:grid;grid-template-columns:88px 1fr;gap:12px;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:11px;margin-bottom:10px}
+.card:active{background:var(--card2)}
+.poster{width:88px;height:132px;border-radius:9px;object-fit:cover;background:var(--card2)}
+.poster.ph{display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:11px;text-align:center}
+.ttl{font-size:15.5px;font-weight:700;margin:0 0 1px}
+.en{font-size:12px;color:var(--dim);margin:0 0 5px}
+.meta{font-size:12.5px;color:var(--dim);margin:0 0 6px}
+.cast{font-size:12.5px;margin:0 0 7px;color:#c7d3ea}
+.cast b{color:var(--dim);font-weight:600}
+.pills{display:flex;flex-wrap:wrap;gap:5px}
+.pill{font-size:11.5px;padding:3px 8px;border-radius:7px;background:var(--card2);border:1px solid var(--line);color:var(--dim)}
+.pill b{color:var(--tx);font-weight:700}
+.pill.g b{color:var(--ok)} .pill.r b{color:#ff8f8f} .pill.y b{color:var(--acc)}
+.pill.na b{color:#5d6b85}
+.tag{position:absolute}
+.sheet{position:fixed;inset:0;background:rgba(4,8,16,.6);opacity:0;pointer-events:none;transition:.18s;z-index:40}
+.sheet.on{opacity:1;pointer-events:auto}
+.panel{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--bg);
+  border-radius:18px 18px 0 0;border-top:1px solid var(--line);transform:translateY(102%);
+  transition:.24s cubic-bezier(.2,.8,.2,1);max-height:92vh;overflow-y:auto;
+  padding:0 16px calc(24px + var(--safe-b));-webkit-overflow-scrolling:touch}
+.panel.on{transform:translateY(0)}
+.grab{width:38px;height:5px;border-radius:3px;background:#3a4866;margin:9px auto 12px}
+.phead{display:grid;grid-template-columns:96px 1fr;gap:13px;align-items:start}
+.phead img{width:96px;height:144px;border-radius:10px;object-fit:cover;background:var(--card2)}
+.close{position:absolute;right:12px;top:calc(10px + var(--safe-t));width:34px;height:34px;border-radius:50%;
+  background:var(--card2);border:1px solid var(--line);color:var(--tx);font-size:18px;line-height:32px;text-align:center}
+.sub{font-size:13.5px;color:var(--dim);font-weight:600;margin:16px 0 6px;letter-spacing:.3px}
+.rt{font-size:14px;margin:0 0 5px;padding-left:16px;position:relative}
+.rt:before{content:"•";position:absolute;left:2px}
+.rt.p:before{color:var(--ok)} .rt.n:before{color:var(--bad)}
+.plot{font-size:14.5px;color:#d6e0f2}
+.note{font-size:12.5px;color:var(--dim);background:var(--card);border:1px solid var(--line);
+  border-radius:9px;padding:9px 11px;margin:8px 0 0}
+.foot{text-align:center;color:var(--dim);font-size:12px;padding:22px 0 6px}
+.banner{background:#3a2a10;border:1px solid #6b4e17;color:#ffd9a0;font-size:13px;
+  padding:8px 12px;border-radius:9px;margin:10px 14px 0;max-width:820px}
+.empty{color:var(--dim);text-align:center;padding:36px 0;font-size:14px}
+</style>
+</head>
+<body>
+<header>
+  <div class="title"><h1>香港電影週報</h1><span class="dt" id="dt"></span></div>
+  <div class="search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="搜尋片名（中／英）…" autocomplete="off">
+  </div>
+  <div class="chips">
+    <button class="chip on" data-f="all">全部</button>
+    <button class="chip" data-f="new">本週新上映</button>
+    <button class="chip" data-f="still">仍在上映</button>
+    <button class="chip" data-f="top">高分優先</button>
+    <select class="sort" id="sort">
+      <option value="date">上映日期</option>
+      <option value="rating">評分</option>
+      <option value="cinemas">戲院數</option>
+    </select>
+  </div>
+</header>
+<div id="net" class="banner" style="display:none">離線模式：顯示上次更新的資料</div>
+<main id="list"></main>
+<div class="foot" id="foot"></div>
+
+<div class="sheet" id="sheet"></div>
+<div class="panel" id="panel"></div>
+
+<script src="data.js"></script>
+<script>
+const D = window.APP_DATA || {movies:[],date:"—"};
+const $ = s => document.querySelector(s);
+let q="", filt="all", sort="date";
+
+function fmt(v){ return (v===null||v===undefined||v===""||v==="-")?null:v; }
+function pill(label,val,cls){
+  const v = fmt(val);
+  return `<span class="pill ${v?cls:'na'}">${label} <b>${v?v:'—'}</b></span>`;
+}
+function pills(m){
+  return `<div class="pills">`
+    + pill("wmoov", m.wmoov, "g")
+    + pill("HKM6", m.hkm6, "g")
+    + pill("IMDb", m.imdb, "y")
+    + pill("RT🍅", m.rt_t, "r")
+    + pill("RT🍿", m.rt_a, "r")
+    + pill("Google", null, "na")
+    + `</div>`;
+}
+function num(v){ const n=parseFloat(v); return isNaN(n)?-1:n; }
+function score(m){ return Math.max(num(m.wmoov)/10, num(m.hkm6)/5, num(m.imdb)/10); }
+
+function filtered(){
+  let a = D.movies.slice();
+  if(filt==="new") a=a.filter(m=>m.kind==="new");
+  if(filt==="still") a=a.filter(m=>m.kind==="still");
+  if(q){ const s=q.toLowerCase();
+    a=a.filter(m=>(m.zh+" "+(m.en||"")).toLowerCase().includes(s)); }
+  if(filt==="top") a.sort((x,y)=>score(y)-score(x));
+  else if(sort==="rating") a.sort((x,y)=>score(y)-score(x));
+  else if(sort==="cinemas") a.sort((x,y)=>num(y.cinemas)-num(x.cinemas));
+  else a.sort((x,y)=>String(y.release_date||"").localeCompare(String(x.release_date||"")));
+  return a;
+}
+function card(m){
+  const pos = m.poster ? `<img class="poster" loading="lazy" src="${m.poster}" alt="">`
+                       : `<div class="poster ph">無海報</div>`;
+  return `<article class="card" data-i="${m.i}">
+    ${pos}
+    <div>
+      <p class="ttl">${m.zh}</p>
+      ${m.en?`<p class="en">${m.en}</p>`:""}
+      <p class="meta">${m.release_date||""} · ${m.cinemas||"?"}院${m.runtime?" · "+m.runtime:""}</p>
+      ${m.cast&&m.cast.length?`<p class="cast"><b>主演：</b>${m.cast.join("、")}</p>`:""}
+      ${pills(m)}
+    </div>
+  </article>`;
+}
+function render(){
+  const a=filtered();
+  const out=[];
+  if(filt==="all"||filt==="top"){
+    const nw=a.filter(m=>m.kind==="new"), st=a.filter(m=>m.kind==="still");
+    if(nw.length){ out.push(`<div class="sechead">本週新上映 · <b>${nw.length}</b> 套</div>`+nw.map(card).join("")); }
+    if(st.length){ out.push(`<div class="sechead">仍然上映 · <b>${st.length}</b> 套</div>`+st.map(card).join("")); }
+  } else out.push(a.map(card).join(""));
+  $("#list").innerHTML = a.length? out.join("") : `<div class="empty">冇符合嘅電影</div>`;
+  $("#foot").textContent = `資料更新：${D.date}　·　共 ${D.movies.length} 套`;
+}
+
+function open(i){
+  const m = D.movies.find(x=>x.i==i); if(!m) return;
+  const rev = m.kind==="new"
+    ? `<div class="note">本週新上映（上畫未滿一星期），按需求不設影評整合。</div>`
+    : (m.pos&&m.pos.length ? `<div class="sub">👍 觀眾正評</div>${m.pos.map(p=>`<p class="rt p">${p}</p>`).join("")}`
+        + (m.neg&&m.neg.length?`<div class="sub">👎 觀眾負評</div>${m.neg.map(p=>`<p class="rt n">${p}</p>`).join("")}`:"")
+        + (m.note?`<div class="note">影評整合：${m.note}</div>`:"")
+      : `<div class="note">本地影評數據不足，暫未能整合。</div>`);
+  $("#panel").innerHTML = `<div class="grab"></div><button class="close" onclick="closeSheet()">✕</button>
+    <div class="phead">
+      ${m.poster?`<img src="${m.poster}" alt="">`:`<div class="poster ph">無海報</div>`}
+      <div>
+        <p class="ttl" style="font-size:18px">${m.zh}</p>
+        ${m.en?`<p class="en" style="font-size:13px">${m.en}</p>`:""}
+        <p class="meta">${m.release_date||""} · ${m.cinemas||"?"}院${m.runtime?" · "+m.runtime:""}${m.genre?" · "+m.genre:""}</p>
+        ${m.cert?`<p class="meta">級別 ${m.cert}</p>`:""}
+        <p class="meta">${m.kind==="new"?"本週新上映":"仍在上映"}</p>
+        ${pills(m)}
+      </div>
+    </div>
+    ${m.director?`<div class="sub">導演</div><p class="plot">${m.director}</p>`:""}
+    ${m.cast&&m.cast.length?`<div class="sub">主演</div><p class="plot">${m.cast.join("、")}</p>`:""}
+    ${m.plot?`<div class="sub">劇情</div><p class="plot">${m.plot}</p>`:""}
+    ${rev}
+    <div class="note" style="margin-top:12px">HKMovie6：${m.hkm6_votes||0} 個評分 · ${m.hkm6_likes||0} 讚好 · ${m.hkm6_reviews||0} 影評
+    <br>評分截至 ${D.date}，僅供參考，會隨時間變動。</div>`;
+  $("#sheet").classList.add("on"); $("#panel").classList.add("on");
+  document.body.style.overflow="hidden";
+}
+function closeSheet(){ $("#sheet").classList.remove("on"); $("#panel").classList.remove("on"); document.body.style.overflow=""; }
+window.closeSheet = closeSheet;
+$("#sheet").onclick = closeSheet;
+$("#list").addEventListener("click", e=>{ const c=e.target.closest(".card"); if(c) open(c.dataset.i); });
+document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); filt=b.dataset.f; render();
+});
+$("#q").addEventListener("input", e=>{ q=e.target.value.trim(); render(); });
+$("#sort").addEventListener("change", e=>{ sort=e.target.value; render(); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSheet(); });
+window.addEventListener("online", ()=>$("#net").style.display="none");
+window.addEventListener("offline", ()=>$("#net").style.display="block");
+if(!navigator.onLine) $("#net").style.display="block";
+$("#dt").textContent = "更新 " + D.date;
+render();
+if("serviceWorker" in navigator && location.protocol==="https:"){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+</script>
+</body>
+</html>
