@@ -17,11 +17,12 @@ def top5(c, n=5):
     if not c or c in ("None", ""): return []
     return [p.strip() for p in re.split(r"\s*,\s*", c) if p.strip()][:n]
 
-def is_new(x): return x.get("release_date") and x["release_date"] >= "2026-09-23"
+def is_new(x): return x.get("kind") == "本週新上映"
 
 def main():
     data = json.load(open(f"{SRC}/movie_data.json"))
     sent = json.load(open(f"{SRC}/sentiment.json"))
+    sent_n = {k.replace(" ", ""): v for k, v in sent.items()}
     os.makedirs(f"{OUT}/posters", exist_ok=True)
     os.makedirs(f"{OUT}/icons", exist_ok=True)
 
@@ -38,7 +39,7 @@ def main():
             im = Image.open(src_poster).convert("RGB")
             im = im.resize((300, 450)) if im.size != (300, 450) else im
             im.save(f"{OUT}/{rel}", "JPEG", quality=82, optimize=True)
-        s = sent.get(x["zh"], {}) if kind == "still" else {}
+        s = sent_n.get(x["zh"].replace(" ", ""), {}) if kind == "still" else {}
         movies.append({
             "i": i, "zh": x["zh"], "en": (x.get("en") or "").strip(),
             "kind": kind, "release_date": x.get("release_date") or "",
