@@ -13,9 +13,18 @@ def hk_today():
     except Exception:
         return datetime.date.today().isoformat()
 
-def top5(c, n=5):
+def top5(c, cen=None, n=5):
+    """回傳 [{zh, en}] — en 由 cast_en.json（Wikidata）查得，查唔到就空字串。"""
     if not c or c in ("None", ""): return []
-    return [p.strip() for p in re.split(r"\s*,\s*", c) if p.strip()][:n]
+    cen = cen or {}
+    out = []
+    for p in re.split(r"\s*,\s*", c):
+        p = p.strip()
+        if not p: continue
+        v = cen.get(p)
+        out.append({"zh": p, "en": (v.get("en") if isinstance(v, dict) else "") or ""})
+        if len(out) >= n: break
+    return out
 
 def is_new(x): return x.get("kind") == "本週新上映"
 
@@ -23,6 +32,8 @@ def main():
     data = json.load(open(f"{SRC}/movie_data.json"))
     sent = json.load(open(f"{SRC}/sentiment.json"))
     sent_n = {k.replace(" ", ""): v for k, v in sent.items()}
+    _cp = f"{SRC}/cast_en.json"
+    cen = json.load(open(_cp, encoding="utf-8")) if os.path.exists(_cp) else {}
     os.makedirs(f"{OUT}/posters", exist_ok=True)
     os.makedirs(f"{OUT}/icons", exist_ok=True)
 
@@ -46,7 +57,7 @@ def main():
             "cinemas": x.get("cinemas") or "", "runtime": (x.get("runtime") or "").replace("None", ""),
             "genre": (x.get("genre") or "").replace("None", ""), "cert": (x.get("cert") or "").replace("None", ""),
             "director": (x.get("director") or "").replace("None", ""),
-            "cast": top5(x.get("cast")), "plot": (x.get("plot") or "").replace("None", ""),
+            "cast": top5(x.get("cast"), cen), "plot": (x.get("plot") or "").replace("None", ""),
             "wmoov": x.get("wmoov"), "hkm6": x.get("hkm6_rating"), "imdb": x.get("imdb"),
             "rt_t": x.get("rt_tomato"), "rt_a": x.get("rt_aud"),
             "hkm6_votes": x.get("hkm6_votes"), "hkm6_likes": x.get("hkm6_likes"),
