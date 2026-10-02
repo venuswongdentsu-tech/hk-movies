@@ -1,5 +1,5 @@
 /* 香港電影週報 — service worker（離線快取） */
-const VER = "hkmv-20261002";
+const VER = "hkmv-20261002-bbefb722";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./data.js",
               "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 
@@ -39,6 +39,22 @@ self.addEventListener("fetch", e => {
         const c = await caches.open(VER);
         return (await c.match("./index.html")) || (await c.match("./")) ||
                new Response("離線", { status: 503 });
+      }
+    })());
+    return;
+  }
+
+  // 資料檔：網絡優先（每週更新必須即刻生效），斷網時回落快取
+  if (url.pathname.endsWith("/data.js")) {
+    e.respondWith((async () => {
+      try {
+        const fresh = await fetch(req, { cache: "no-store" });
+        const c = await caches.open(VER);
+        if (fresh && fresh.ok) c.put("./data.js", fresh.clone());
+        return fresh;
+      } catch (err) {
+        const c = await caches.open(VER);
+        return (await c.match("./data.js")) || new Response("", { status: 503 });
       }
     })());
     return;

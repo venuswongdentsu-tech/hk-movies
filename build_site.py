@@ -72,8 +72,11 @@ def main():
         f.write(";\n")
 
     ds = hk_today().replace("-", "")
+    # VER 加入 data.js 內容雜湊：資料一改，快取名就跟住變 → 強制手機更新快取
+    import hashlib
+    h = hashlib.sha1(open(f"{OUT}/data.js", "rb").read()).hexdigest()[:8]
     with open(f"{OUT}/sw.js", encoding="utf-8") as f: sw = f.read()
-    sw = re.sub(r'const VER = "[^"]*"', f'const VER = "hkmv-{ds}"', sw)
+    sw = re.sub(r'const VER = "[^"]*"', f'const VER = "hkmv-{ds}-{h}"', sw)
     with open(f"{OUT}/sw.js", "w", encoding="utf-8") as f: f.write(sw)
 
     # ---- icons ----

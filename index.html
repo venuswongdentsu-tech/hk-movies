@@ -136,7 +136,8 @@ function pills(m){
     + `</div>`;
 }
 function num(v){ const n=parseFloat(v); return isNaN(n)?-1:n; }
-function cfmt(a){ return (a||[]).map(c=> (c&&c.en) ? `${c.zh}<span class="cen"> ${c.en}</span>` : (c&&c.zh?c.zh:c)).join("、"); }
+function cobj(c){ return (c&&typeof c==="object")?c:{zh:(c==null?"":String(c)),en:""}; }
+function cfmt(a){ return (a||[]).map(c=>{const o=cobj(c); return o.en?`${o.zh}<span class="cen"> ${o.en}</span>`:(o.zh||"");}).join("、"); }
 function score(m){ return Math.max(num(m.wmoov)/10, num(m.hkm6)/5, num(m.imdb)/10); }
 
 function filtered(){
@@ -198,7 +199,7 @@ function open(i){
       </div>
     </div>
     ${m.director?`<div class="sub">導演</div><p class="plot">${m.director}</p>`:""}
-    ${m.cast&&m.cast.length?`<div class="sub">主演</div><div class="plist">${m.cast.map(c=>`<p class="prow">${c.zh}${c.en?` <span>${c.en}</span>`:""}</p>`).join("")}</div>`:""}
+    ${m.cast&&m.cast.length?`<div class="sub">主演</div><div class="plist">${m.cast.map(c=>{const o=cobj(c);return `<p class="prow">${o.zh}${o.en?` <span>${o.en}</span>`:""}</p>`;}).join("")}</div>`:""}
     ${m.plot?`<div class="sub">劇情</div><p class="plot">${m.plot}</p>`:""}
     ${rev}
     <div class="note" style="margin-top:12px">HKMovie6：${m.hkm6_votes||0} 個評分 · ${m.hkm6_likes||0} 讚好 · ${m.hkm6_reviews||0} 影評
