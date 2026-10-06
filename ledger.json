@@ -1,5 +1,24 @@
 {
  "version": 1,
- "updated": "2026-10-06T04:20:48.567Z",
- "items": []
+ "updated": "2026-10-06T04:31:15.181Z",
+ "items": [
+  {
+   "id": "a231cecd39",
+   "date": "2026-09-26",
+   "time": "13:55",
+   "product": "母乳實感配件 吸管",
+   "product_zh": "母乳實感配件 吸管",
+   "product_original": "母乳実感パーツ ストロー",
+   "qty": 1,
+   "amount": 880,
+   "currency": "JPY",
+   "fx": 0.0496677969401657,
+   "hkd": 43.71,
+   "category": "日用百貨",
+   "store": "アカチャンホンポ 浦添西海岸パルコシティ店",
+   "note": "",
+   "receipt_id": "18012e3933",
+   "source": "cdd60b2db9.jpg"
+  }
+ ]
 }
