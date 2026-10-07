@@ -17,5 +17,12 @@ fi
 git commit -q -m "weekly update $(TZ=Asia/Hong_Kong date +%Y-%m-%d)"
 
 echo "== 3/3 push =="
-git push -q origin main
+# 遠端若有其他 commit（例如其他工具／人手推過），先 rebase 再重試一次
+if ! git push -q origin main 2>/tmp/hkm_push_err.txt; then
+  echo "推送被拒，fetch + rebase 後重試…"
+  cat /tmp/hkm_push_err.txt
+  git fetch -q origin main
+  git rebase -q origin/main
+  git push -q origin main
+fi
 echo "完成。GitHub Pages 約 1 分鐘內更新。"
