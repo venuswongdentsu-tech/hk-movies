@@ -1,5 +1,5 @@
 /* 香港電影週報 — service worker（離線快取） */
-const VER = "hkmv-20261110-6dd031f8";
+const VER = "hkmv-20261110-05722124";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./data.js",
               "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 
