@@ -2,6 +2,15 @@
 # 每週更新：重建網站資料並推到 GitHub Pages
 # 用法：bash hourly_refresh.sh   （實際每週由 cron 執行）
 set -euo pipefail
+
+# build_site.py 需要 PIL；系統 python3 冇 PIL，優先用 workspace 內嘅 venv
+for cand in /workspace/.venv-movies/bin /opt/data/pilenv/bin /opt/hermes/venv/bin; do
+  if [ -x "$cand/python3" ] && "$cand/python3" -c "import PIL" 2>/dev/null; then
+    export PATH="$cand:$PATH"
+    break
+  fi
+done
+
 REPO="/workspace/hk-movies-app"
 MV="/workspace/movies"
 
