@@ -28,7 +28,7 @@ wmoov（上映日期、戲院數、人氣、評分）· HKMovie6（評分、讚�
 ```
 bash /workspace/movies/weekly_pipeline.sh               # 全流程（清快取→抓→整合）
 bash /workspace/movies/weekly_fetch.sh                 # = 上面 + 影評摘要 + 建站推送
-# → 之後由 agent 讀 reviews_digest.txt、更新 sentiment.json（每次最多 20 套，優先未處理嘅戲）
+# → 之後由 agent 讀 reviews_digest.txt、更新 sentiment.json（每次最多 60 套，優先未處理嘅戲）
 bash /workspace/hk-movies-app/refresh_and_push.sh      # 建站並推送
 ```
 
