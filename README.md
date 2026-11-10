@@ -20,18 +20,16 @@ wmoov（上映日期、戲院數、人氣、評分）· HKMovie6（評分、讚�
 
 **限制：** Google 電影用戶評分無公開可抓取端點，一律顯示「—」；部分港產／亞洲片在 Rotten Tomatoes 無獨立頁面，同樣顯示「—」（不代表套戲差）。
 
+## 收錄範圍
+
+`scrape_wmoov.py` 每次由 wmoov「現正上映」列表**自動發現全部電影 ID**（唔再靠人手維護清單），再逐套抓詳情頁；`build_shortlist.py` 收錄**所有至少 1 間戲院有場次**嘅電影（包括經典重映、1 院上映），因此片單會隨每週實際上畫情況增減（2026-11 約 96 套）。
+
 ## 更新流程（每週）
 ```
-cd /workspace/movies && python3 scrape_wmoov.py       # 上映名單
-cd /workspace/movies && python3 scrape_hkm6.py        # HKMovie6 詳情
-cd /workspace/movies && python3 scrape_imdb2.py       # IMDb
-cd /workspace/movies && python3 scrape_rt.py          # Rotten Tomatoes
-cd /workspace/movies && python3 scrape_poster.py      # 海報
-cd /workspace/movies && python3 scrape_reviews.py     # 觀眾影評
-cd /workspace/movies && python3 compile.py            # 整合 movie_data.json
-# → 由 agent 讀影評、寫 sentiment.json（正／負評整合）
-cd /workspace/hk-movies-app && python3 build_site.py  # 產生 data.js / posters / icons
-git add -A && git commit -m "weekly update" && git push
+bash /workspace/movies/weekly_pipeline.sh               # 全流程（清快取→抓→整合）
+bash /workspace/movies/weekly_fetch.sh                 # = 上面 + 影評摘要 + 建站推送
+# → 之後由 agent 讀 reviews_digest.txt、更新 sentiment.json（每次最多 20 套，優先未處理嘅戲）
+bash /workspace/hk-movies-app/refresh_and_push.sh      # 建站並推送
 ```
 
 Site 完全靜態，`git push` 後 GitHub Pages 約 1 分鐘內自動更新。
